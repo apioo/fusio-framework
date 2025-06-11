@@ -1,0 +1,6 @@
+todo_created:
+  description: 'Todo was created'
+todo_updated:
+  description: 'Todo was updated'
+todo_deleted:
+  description: 'Todo was deleted'

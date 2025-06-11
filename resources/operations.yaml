@@ -1,0 +1,5 @@
+"todo.getAll": !include resources/operations/todo/collection.php
+"todo.get": !include resources/operations/todo/entity.php
+"todo.create": !include resources/operations/todo/create.php
+"todo.update": !include resources/operations/todo/update.php
+"todo.delete": !include resources/operations/todo/delete.php

@@ -1,0 +1,57 @@
+{
+  "definitions": {
+    "Collection": {
+      "description": "A collection of things",
+      "type": "object",
+      "properties": {
+        "totalResults": {
+          "type": "integer"
+        },
+        "entry": {
+          "type": "array",
+          "items": {
+            "$generic": "T"
+          }
+        }
+      }
+    },
+    "Message": {
+      "description": "Contains a message whether the operation was successful or not",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        }
+      }
+    },
+    "Todo": {
+      "description": "A specific todo",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "integer"
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "insertDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Todo_Collection": {
+      "description": "A collection of all todos",
+      "$ref": "Collection",
+      "$template": {
+        "T": "Todo"
+      }
+    }
+  }
+}
