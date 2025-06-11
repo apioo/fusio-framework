@@ -8,7 +8,7 @@
 This repository contains a starter project to use [Fusio](https://github.com/apioo/fusio) as a framework.
 You can find more general information about Fusio at the [website](https://www.fusio-project.org/) or GitHub [repository](https://github.com/apioo/fusio).
 
-## About
+## ℹ️ About
 
 Fusio is an API management tool where you can configure i.e. operations, actions and schemas
 through the backend. Using Fusio as a Framework basically only means that you can place
@@ -18,7 +18,7 @@ which reads all configuration files under `resources` and post them to the inter
 like you would also do through the backend panel. This repository contains all configuration files and a demo todo endpoint which shows
 how you can build a simple endpoint.
 
-## Installation
+## 🛠️ Installation
 
 * Run `composer install` to install all required dependencies
 * Enter the correct database credentials at the `.env` file
@@ -34,7 +34,7 @@ how you can build a simple endpoint.
 > Note this repository does not contain the Fusio backend app, since we develop the complete API via source files. If you
 want to use the backend app you need to install it from the marketplace via: `php bin/fusio marketplace:install fusio`
 
-## Folder
+## 📁 Folder
 
 ### resources/
 
@@ -66,7 +66,7 @@ want to use the backend app you need to install it from the marketplace via: `ph
 * `View`  
   > Contains custom views to return the collection and entity response
 
-## Docker
+## 🐳 Docker
 
 This repository contains a [Dockerfile](./Dockerfile) and [GitHub action](./.github/workflows/docker.yml) to
 automatically build a Docker image on push. You can then run this image on any Docker
