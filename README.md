@@ -38,32 +38,42 @@ want to use the backend app you need to install it from the marketplace via: `ph
 
 ### resources/
 
-* `operations`  
+* __operations__
   > Folder which contains operation configurations
-* `config.yaml`  
+
+* __config.yaml__
   > Contains the Fusio system config
-* `container.php`  
+
+* __container.php__
   > Contains the [Symfony DI](https://symfony.com/doc/current/components/dependency_injection.html) container configuration
-* `events.yaml`  
+
+* __events.yaml__
   > Contains a list of events which are triggered by the app. Users can then register HTTP callbacks to receives those events
-* `operations.yaml`  
+
+* __operations.yaml__
   > Contains all available operations with a reference to an operation file inside the `operations/` folder
-* `typeschema.json`  
+
+* __typeschema.json__
   > Contains the [TypeSchema](https://typeschema.org/) specification to generate the model classes under `src/Model`
 
 ### src/
 
-* `Action`  
+* __Action__
   > Contains all action classes which are used at the defined operations
-* `Migrations`  
+
+* __Migrations__
   > Contains all migration files to setup the database structure (`php bin/fusio migration:generate`)
-* `Model`  
+
+* __Model__
   > Contains the generated model classes (`php bin/fusio generate:model`)
-* `Service`  
+
+* __Service__
   > Contains the service classes which handle the business logic of your API
-* `Table`  
+
+* __Table__
   > Contains all table classes (`php bin/fusio generate:table`)
-* `View`  
+
+* __View__
   > Contains custom views to return the collection and entity response
 
 ## 🐳 Docker
