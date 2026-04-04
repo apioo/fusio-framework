@@ -36,6 +36,9 @@ class Todo implements \JsonSerializable, \PSX\Record\RecordableInterface
     {
         return $this->insertDate;
     }
+    /**
+     * @return \PSX\Record\RecordInterface<mixed>
+     */
     public function toRecord(): \PSX\Record\RecordInterface
     {
         /** @var \PSX\Record\Record<mixed> $record */
