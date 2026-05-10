@@ -11,7 +11,7 @@ use PSX\Sql\ViewAbstract;
 
 class Todo extends ViewAbstract
 {
-    public function getCollection(int $refId, int $startIndex, int $count, ?string $search = null): mixed
+    public function getCollection(int $startIndex, int $count, ?string $search = null): mixed
     {
         if (empty($startIndex) || $startIndex < 0) {
             $startIndex = 0;
@@ -22,28 +22,27 @@ class Todo extends ViewAbstract
         }
 
         $condition = Condition::withAnd();
-        $condition->equals(Table\Generated\CommentTable::COLUMN_REF_ID, $refId);
 
         if ($search !== null && $search !== '') {
-            $condition->like(Table\Generated\CommentTable::COLUMN_CONTENT, '%' . $search . '%');
+            $condition->like(Table\Generated\TodoTable::COLUMN_TITLE, '%' . $search . '%');
         }
 
         $builder = new Builder($this->connection);
 
         $definition = [
-            'totalResults' => $this->getTable(Table\Comment::class)->getCount($condition),
+            'totalResults' => $this->getTable(Table\Todo::class)->getCount($condition),
             'startIndex' => $startIndex,
             'itemsPerPage' => $count,
-            'entry' => $builder->doCollection([$this->getTable(Table\Comment::class), 'findAll'], [$condition, $startIndex, $count], [
-                'id' => $builder->fieldInteger(Table\Generated\CommentTable::COLUMN_ID),
-                'user' => $builder->doEntity([$this->getTable(UserTable::class), 'find'], [new Reference(Table\Generated\CommentTable::COLUMN_USER_ID)], [
+            'items' => $builder->doCollection([$this->getTable(Table\Todo::class), 'findAll'], [$condition, $startIndex, $count], [
+                'id' => $builder->fieldInteger(Table\Generated\TodoTable::COLUMN_ID),
+                'user' => $builder->doEntity([$this->getTable(UserTable::class), 'find'], [new Reference(Table\Generated\TodoTable::COLUMN_USER_ID)], [
                     'id' => $builder->fieldInteger(UserTable::COLUMN_ID),
                     'name' => UserTable::COLUMN_NAME,
                 ]),
-                'content' => Table\Generated\CommentTable::COLUMN_CONTENT,
-                'insertDate' => $builder->fieldDateTime(Table\Generated\CommentTable::COLUMN_INSERT_DATE),
+                'title' => Table\Generated\TodoTable::COLUMN_TITLE,
+                'insertDate' => $builder->fieldDateTime(Table\Generated\TodoTable::COLUMN_INSERT_DATE),
                 'links' => [
-                    'self' => $builder->fieldFormat('id', '/comment/%s'),
+                    'self' => $builder->fieldFormat('id', '/todo/%s'),
                 ]
             ]),
         ];
@@ -55,14 +54,14 @@ class Todo extends ViewAbstract
     {
         $builder = new Builder($this->connection);
 
-        $definition = $builder->doEntity([$this->getTable(Table\Comment::class), 'find'], [$id], [
-            'id' => $builder->fieldInteger(Table\Generated\CommentTable::COLUMN_ID),
-            'user' => $builder->doEntity([$this->getTable(UserTable::class), 'find'], [new Reference(Table\Generated\CommentTable::COLUMN_USER_ID)], [
+        $definition = $builder->doEntity([$this->getTable(Table\Todo::class), 'find'], [$id], [
+            'id' => $builder->fieldInteger(Table\Generated\TodoTable::COLUMN_ID),
+            'user' => $builder->doEntity([$this->getTable(UserTable::class), 'find'], [new Reference(Table\Generated\TodoTable::COLUMN_USER_ID)], [
                 'id' => $builder->fieldInteger(UserTable::COLUMN_ID),
                 'name' => UserTable::COLUMN_NAME,
             ]),
-            'content' => Table\Generated\CommentTable::COLUMN_CONTENT,
-            'insertDate' => $builder->fieldDateTime(Table\Generated\CommentTable::COLUMN_INSERT_DATE),
+            'title' => Table\Generated\TodoTable::COLUMN_TITLE,
+            'insertDate' => $builder->fieldDateTime(Table\Generated\TodoTable::COLUMN_INSERT_DATE),
             'links' => [
                 'self' => $builder->fieldFormat('id', '/comment/%s'),
             ]

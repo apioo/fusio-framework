@@ -5,6 +5,7 @@ namespace App\Table\Generated;
 class TodoRow implements \JsonSerializable, \PSX\Record\RecordableInterface
 {
     private ?int $id = null;
+    private ?int $userId = null;
     private ?int $completed = null;
     private ?string $title = null;
     private ?\PSX\DateTime\LocalDateTime $insertDate = null;
@@ -15,6 +16,14 @@ class TodoRow implements \JsonSerializable, \PSX\Record\RecordableInterface
     public function getId(): int
     {
         return $this->id ?? throw new \PSX\Sql\Exception\NoValueAvailable('No value for required column "id" was provided');
+    }
+    public function setUserId(int $userId): void
+    {
+        $this->userId = $userId;
+    }
+    public function getUserId(): int
+    {
+        return $this->userId ?? throw new \PSX\Sql\Exception\NoValueAvailable('No value for required column "user_id" was provided');
     }
     public function setCompleted(?int $completed): void
     {
@@ -45,6 +54,7 @@ class TodoRow implements \JsonSerializable, \PSX\Record\RecordableInterface
         /** @var \PSX\Record\Record<mixed> $record */
         $record = new \PSX\Record\Record();
         $record->put('id', $this->id);
+        $record->put('user_id', $this->userId);
         $record->put('completed', $this->completed);
         $record->put('title', $this->title);
         $record->put('insert_date', $this->insertDate);
@@ -54,10 +64,14 @@ class TodoRow implements \JsonSerializable, \PSX\Record\RecordableInterface
     {
         return (object) $this->toRecord()->getAll();
     }
+    /**
+     * @param array<string, mixed>|\ArrayAccess<string, mixed> $data
+     */
     public static function from(array|\ArrayAccess $data): self
     {
         $row = new self();
         $row->id = isset($data['id']) && is_int($data['id']) ? $data['id'] : null;
+        $row->userId = isset($data['user_id']) && is_int($data['user_id']) ? $data['user_id'] : null;
         $row->completed = isset($data['completed']) && is_int($data['completed']) ? $data['completed'] : null;
         $row->title = isset($data['title']) && is_string($data['title']) ? $data['title'] : null;
         $row->insertDate = isset($data['insert_date']) && $data['insert_date'] instanceof \DateTimeInterface ? \PSX\DateTime\LocalDateTime::from($data['insert_date']) : null;

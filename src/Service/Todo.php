@@ -26,7 +26,7 @@ class Todo
 
         $row = new Table\Generated\TodoRow();
         $row->setCompleted($todo->getCompleted() ? 1 : 0);
-        $row->setTitle($todo->getTitle());
+        $row->setTitle($todo->getTitle() ?? throw new StatusCode\BadRequestException('No title provided'));
         $row->setInsertDate(LocalDateTime::now());
         $this->table->create($row);
 

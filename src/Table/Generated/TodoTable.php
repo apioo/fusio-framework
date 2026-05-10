@@ -9,6 +9,7 @@ class TodoTable extends \PSX\Sql\TableAbstract
 {
     public const NAME = 'app_todo';
     public const COLUMN_ID = 'id';
+    public const COLUMN_USER_ID = 'user_id';
     public const COLUMN_COMPLETED = 'completed';
     public const COLUMN_TITLE = 'title';
     public const COLUMN_INSERT_DATE = 'insert_date';
@@ -18,7 +19,7 @@ class TodoTable extends \PSX\Sql\TableAbstract
     }
     public function getColumns(): array
     {
-        return [self::COLUMN_ID => 0x3020000a, self::COLUMN_COMPLETED => 0x4020000a, self::COLUMN_TITLE => 0xa000ff, self::COLUMN_INSERT_DATE => 0x800000];
+        return [self::COLUMN_ID => 0x3020000a, self::COLUMN_USER_ID => 0x20000a, self::COLUMN_COMPLETED => 0x4020000a, self::COLUMN_TITLE => 0xa000ff, self::COLUMN_INSERT_DATE => 0x800000];
     }
     /**
      * @return array<\App\Table\Generated\TodoRow>
@@ -87,6 +88,43 @@ class TodoTable extends \PSX\Sql\TableAbstract
     {
         $condition = \PSX\Sql\Condition::withAnd();
         $condition->equals('id', $value);
+        return $this->doDeleteBy($condition);
+    }
+    /**
+     * @return array<\App\Table\Generated\TodoRow>
+     * @throws \PSX\Sql\Exception\QueryException
+     */
+    public function findByUserId(int $value, ?int $startIndex = null, ?int $count = null, ?\App\Table\Generated\TodoColumn $sortBy = null, ?\PSX\Sql\OrderBy $sortOrder = null): array
+    {
+        $condition = \PSX\Sql\Condition::withAnd();
+        $condition->equals('user_id', $value);
+        return $this->doFindBy($condition, $startIndex, $count, $sortBy, $sortOrder);
+    }
+    /**
+     * @throws \PSX\Sql\Exception\QueryException
+     */
+    public function findOneByUserId(int $value): ?\App\Table\Generated\TodoRow
+    {
+        $condition = \PSX\Sql\Condition::withAnd();
+        $condition->equals('user_id', $value);
+        return $this->doFindOneBy($condition);
+    }
+    /**
+     * @throws \PSX\Sql\Exception\ManipulationException
+     */
+    public function updateByUserId(int $value, \App\Table\Generated\TodoRow $record): int
+    {
+        $condition = \PSX\Sql\Condition::withAnd();
+        $condition->equals('user_id', $value);
+        return $this->doUpdateBy($condition, $record->toRecord());
+    }
+    /**
+     * @throws \PSX\Sql\Exception\ManipulationException
+     */
+    public function deleteByUserId(int $value): int
+    {
+        $condition = \PSX\Sql\Condition::withAnd();
+        $condition->equals('user_id', $value);
         return $this->doDeleteBy($condition);
     }
     /**

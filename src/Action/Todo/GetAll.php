@@ -20,7 +20,6 @@ class GetAll implements ActionInterface
     public function handle(RequestInterface $request, ParametersInterface $configuration, ContextInterface $context): mixed
     {
         return $this->view->getCollection(
-            (int) $request->get('refId'),
             (int) $request->get('startIndex'),
             (int) $request->get('count'),
             $request->get('search'),

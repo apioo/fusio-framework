@@ -32,8 +32,11 @@
     }
   ],
   "require": {
-    "php": ">=8.3",
+    "php": ">=8.4",
     "fusio/impl": "^8.0"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1"
   },
   "autoload": {
     "psr-4": {

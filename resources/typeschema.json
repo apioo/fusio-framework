@@ -2,22 +2,29 @@
   "definitions": {
     "Collection": {
       "description": "A collection of things",
-      "type": "object",
+      "type": "struct",
       "properties": {
         "totalResults": {
           "type": "integer"
         },
-        "entry": {
+        "startIndex": {
+          "type": "integer"
+        },
+        "itemsPerPage": {
+          "type": "integer"
+        },
+        "items": {
           "type": "array",
-          "items": {
-            "$generic": "T"
+          "schema": {
+            "type": "generic",
+            "name": "T"
           }
         }
       }
     },
     "Message": {
       "description": "Contains a message whether the operation was successful or not",
-      "type": "object",
+      "type": "struct",
       "properties": {
         "success": {
           "type": "boolean"
@@ -30,12 +37,28 @@
         }
       }
     },
-    "Todo": {
-      "description": "A specific todo",
-      "type": "object",
+    "User": {
+      "description": "Represents a user",
+      "type": "struct",
       "properties": {
-        "title": {
+        "id": {
           "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "Todo": {
+      "description": "Represents a todo",
+      "type": "struct",
+      "properties": {
+        "user": {
+          "type": "reference",
+          "target": "User"
+        },
+        "title": {
+          "type": "string"
         },
         "completed": {
           "type": "boolean"
@@ -48,9 +71,13 @@
     },
     "Todo_Collection": {
       "description": "A collection of all todos",
-      "$ref": "Collection",
-      "$template": {
-        "T": "Todo"
+      "type": "struct",
+      "parent": {
+        "type": "reference",
+        "target": "Collection",
+        "template": {
+          "T": "Todo"
+        }
       }
     }
   }
