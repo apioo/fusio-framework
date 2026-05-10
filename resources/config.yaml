@@ -3,7 +3,7 @@
 info_title: "Fusio"
 # A short description of the application. CommonMark syntax MAY be used for rich 
 # text representation
-info_description: ""
+info_description: "A simple Todo API"
 # A URL to the Terms of Service for the API. MUST be in the format of a URL
 info_tos: ""
 # The identifying name of the contact person/organization
