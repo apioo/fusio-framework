@@ -37,7 +37,10 @@ php bin/fusio generate:model                      # resources/typeschema.json ->
 php bin/fusio migrations:generate --no-interaction  # new empty migration in src/Migrations
 php bin/fusio migrations:migrate --no-interaction   # run migrations; ASK THE USER FIRST
 php bin/fusio generate:table                      # DB tables with prefix app_ -> src/Table/Generated
-php bin/fusio deploy                              # push resources/* to the Fusio instance
+php bin/fusio adduser                             # create an account (interactive; user runs it via `!`)
+php bin/fusio login                               # authenticate the CLI (interactive; user runs it via `!`)
+php bin/fusio whoami                              # current CLI user, `null` = not logged in
+php bin/fusio deploy                              # push resources/* to the Fusio instance (needs login)
 php bin/fusio generate:sdk client-typescript      # SDK zip in output/
 php bin/fusio route                               # list routes
 ```
@@ -72,6 +75,9 @@ php bin/fusio route                               # list routes
 - **Code style:** PSR-4 `App\` namespace mapped to `src/`, a short class docblock on actions and services, and PHP 8.4
   syntax. Use `phpstan` (`vendor/bin/phpstan`) and `rector` for checks.
 - After changing anything in `resources/`, remind the user to run (or offer to run) `php bin/fusio deploy`.
+- **Deploy requires a logged-in CLI**, so the order is `adduser`, then `login`, then `deploy`. After a fresh install
+  no user exists, so `adduser` (role 1 = Administrator) must come first. Check with `php bin/fusio whoami`. Never run
+  `adduser` or `login` yourself or handle passwords. Ask the user to run them with the `!` prefix.
 
 ## Workflows (skills)
 

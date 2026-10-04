@@ -43,15 +43,23 @@ the migration and the `app_todo` table classes if the migration has never run on
 
 ## 5. Install tables, create the admin, log in (user runs or approves)
 
-```
-php bin/fusio migrations:migrate --no-interaction   # installs Fusio + app tables
-php bin/fusio adduser                  # create an administrator (interactive)
-php bin/fusio login                    # authenticate the CLI (interactive)
-php bin/fusio deploy                   # apply resources/*
-```
+These steps must run in this order, because each one depends on the previous one:
 
-`adduser` and `login` prompt for input, so ask the user to run them with the `!` prefix (e.g.
-`! php bin/fusio adduser`). Ask before running `migrate` against their database.
+1. **Install tables.** Ask before running this against their database:
+
+   ```
+   php bin/fusio migrations:migrate --no-interaction
+   ```
+
+2. **Create an administrator account.** A fresh installation has no users, and `login` only works with an existing
+   account. The user runs `! php bin/fusio adduser` and picks role `1` (Administrator).
+3. **Log in the CLI** with those credentials. The user runs `! php bin/fusio login`. This stores an access token in
+   `fusio_token.json`, which expires after 2 days by default.
+4. **Deploy:** `php bin/fusio deploy` (see `/fusio-deploy`).
+
+`adduser` and `login` prompt for credentials. Never run them yourself and never ask for the password in chat. Tell the
+user to run them with the `!` prefix as shown, then confirm the login with `php bin/fusio whoami` (it prints `null`
+if nobody is logged in) before you deploy.
 
 ## 6. Next steps
 
