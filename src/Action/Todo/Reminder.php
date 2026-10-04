@@ -12,7 +12,7 @@ use Fusio\Engine\RequestInterface;
 /**
  * Action which updates a todo entry
  */
-readonly class Update implements ActionInterface
+readonly class Reminder implements ActionInterface
 {
     public function __construct(private Service\Todo $service)
     {
@@ -20,15 +20,11 @@ readonly class Update implements ActionInterface
 
     public function handle(RequestInterface $request, ParametersInterface $configuration, ContextInterface $context): Message
     {
-        $id = $this->service->update(
-            (int) $request->get('id'),
-            $request->getPayload()
-        );
+        $this->service->reminder();
 
         $message = new Message();
         $message->setSuccess(true);
-        $message->setMessage('Todo successfully updated');
-        $message->setId($id);
+        $message->setMessage('Todo reminder successfully executed');
 
         return $message;
     }

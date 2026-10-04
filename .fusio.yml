@@ -5,6 +5,12 @@
 # Fusio configuration on deployment. The deployment then calls also the internal API to create these resources. To see
 # an example howto use the deployment please take a look at our repository: https://github.com/apioo/fusio-sample-cms
 
+#agent: !include resources/agent.yaml
 config: !include resources/config.yaml
-event: !include resources/events.yaml
-operation: !include resources/operations.yaml
+#connection: !include resources/connection.yaml
+cronjob: !include resources/cronjob.yaml
+event: !include resources/event.yaml
+operation: !include resources/operation.yaml
+#plan: !include resources/plan.yaml
+role: !include resources/role.yaml
+scope: !include resources/scope.yaml

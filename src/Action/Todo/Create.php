@@ -9,8 +9,7 @@ use Fusio\Engine\ContextInterface;
 use Fusio\Engine\ParametersInterface;
 use Fusio\Engine\RequestInterface;
 use Fusio\Engine\Response\FactoryInterface;
-use PSX\Http\Exception\InternalServerErrorException;
-use PSX\Http\Exception\StatusCodeException;
+use PSX\Http\Environment\HttpResponseInterface;
 
 /**
  * Action to create a todo entry
@@ -21,23 +20,17 @@ readonly class Create implements ActionInterface
     {
     }
 
-    public function handle(RequestInterface $request, ParametersInterface $configuration, ContextInterface $context): mixed
+    public function handle(RequestInterface $request, ParametersInterface $configuration, ContextInterface $context): HttpResponseInterface
     {
-        try {
-            $id = $this->service->create(
-                $request->getPayload(),
-                $context
-            );
+        $id = $this->service->create(
+            $request->getPayload(),
+            $context
+        );
 
-            $message = new Message();
-            $message->setSuccess(true);
-            $message->setMessage('Todo successful created');
-            $message->setId($id);
-        } catch (StatusCodeException $e) {
-            throw $e;
-        } catch (\Throwable $e) {
-            throw new InternalServerErrorException($e->getMessage());
-        }
+        $message = new Message();
+        $message->setSuccess(true);
+        $message->setMessage('Todo successfully created');
+        $message->setId($id);
 
         return $this->response->build(201, [], $message);
     }

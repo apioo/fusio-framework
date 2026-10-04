@@ -1,0 +1,3 @@
+Reminder:
+  cron: "0 0 * * 0"
+  action: "App\\Action\\Todo\\Reminder"
