@@ -63,7 +63,7 @@ class Todo extends ViewAbstract
             'title' => Table\Generated\TodoTable::COLUMN_TITLE,
             'insertDate' => $builder->fieldDateTime(Table\Generated\TodoTable::COLUMN_INSERT_DATE),
             'links' => [
-                'self' => $builder->fieldFormat('id', '/comment/%s'),
+                'self' => $builder->fieldFormat('id', '/todo/%s'),
             ]
         ]);
 
