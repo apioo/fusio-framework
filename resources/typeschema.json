@@ -53,6 +53,9 @@
       "description": "Represents a todo",
       "type": "struct",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "user": {
           "type": "reference",
           "target": "User"

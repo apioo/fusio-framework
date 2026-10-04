@@ -9,10 +9,19 @@ use PSX\Schema\Attribute\Description;
 #[Description('Represents a todo')]
 class Todo implements \JsonSerializable, \PSX\Record\RecordableInterface
 {
+    protected ?int $id = null;
     protected ?User $user = null;
     protected ?string $title = null;
     protected ?bool $completed = null;
     protected ?\PSX\DateTime\LocalDateTime $insertDate = null;
+    public function setId(?int $id): void
+    {
+        $this->id = $id;
+    }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
     public function setUser(?User $user): void
     {
         $this->user = $user;
@@ -52,6 +61,7 @@ class Todo implements \JsonSerializable, \PSX\Record\RecordableInterface
     {
         /** @var \PSX\Record\Record<mixed> $record */
         $record = new \PSX\Record\Record();
+        $record->put('id', $this->id);
         $record->put('user', $this->user);
         $record->put('title', $this->title);
         $record->put('completed', $this->completed);
