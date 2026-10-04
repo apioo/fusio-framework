@@ -11,7 +11,7 @@ use Fusio\Engine\RequestInterface;
 /**
  * Action which returns a specific todo entry
  */
-class Get implements ActionInterface
+readonly class Get implements ActionInterface
 {
     public function __construct(private View\Todo $view)
     {

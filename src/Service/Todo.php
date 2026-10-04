@@ -14,7 +14,7 @@ use PSX\Http\Exception as StatusCode;
 /**
  * Service which is responsible to create, update and delete a todo entry
  */
-class Todo
+readonly class Todo
 {
     public function __construct(private Table\Todo $table, private DispatcherInterface $dispatcher)
     {
@@ -71,7 +71,7 @@ class Todo
 
     private function dispatchEvent(string $type, Table\Generated\TodoRow $data, int $id): void
     {
-        $event = (new Builder())
+        $event = new Builder()
             ->withId(Uuid::pseudoRandom())
             ->withSource('/todo/' . $id)
             ->withType($type)
