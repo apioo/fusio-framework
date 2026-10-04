@@ -4,6 +4,7 @@ namespace App\View;
 
 use App\Table;
 use Fusio\Impl\Table\Generated\UserTable;
+use PSX\Http\Exception as StatusCode;
 use PSX\Nested\Builder;
 use PSX\Nested\Reference;
 use PSX\Sql\Condition;
@@ -40,10 +41,8 @@ class Todo extends ViewAbstract
                     'name' => UserTable::COLUMN_NAME,
                 ]),
                 'title' => Table\Generated\TodoTable::COLUMN_TITLE,
+                'completed' => $builder->fieldBoolean(Table\Generated\TodoTable::COLUMN_COMPLETED),
                 'insertDate' => $builder->fieldDateTime(Table\Generated\TodoTable::COLUMN_INSERT_DATE),
-                'links' => [
-                    'self' => $builder->fieldFormat('id', '/todo/%s'),
-                ]
             ]),
         ];
 
@@ -61,12 +60,15 @@ class Todo extends ViewAbstract
                 'name' => UserTable::COLUMN_NAME,
             ]),
             'title' => Table\Generated\TodoTable::COLUMN_TITLE,
+            'completed' => $builder->fieldBoolean(Table\Generated\TodoTable::COLUMN_COMPLETED),
             'insertDate' => $builder->fieldDateTime(Table\Generated\TodoTable::COLUMN_INSERT_DATE),
-            'links' => [
-                'self' => $builder->fieldFormat('id', '/todo/%s'),
-            ]
         ]);
 
-        return $builder->build($definition);
+        $entity = $builder->build($definition);
+        if (empty($entity)) {
+            throw new StatusCode\NotFoundException('Provided todo entry does not exist');
+        }
+
+        return $entity;
     }
 }
