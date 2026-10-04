@@ -1,14 +1,12 @@
 Consumer:
   scopes:
     - authorization
-    - commit
     - consumer
     - default
     - todo
 Administrator:
   scopes:
     - authorization
-    - commit
     - consumer
     - default
     - todo
