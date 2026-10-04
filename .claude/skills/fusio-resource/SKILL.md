@@ -50,7 +50,9 @@ to run before the code will work.
 ## 3. View: `src/View/<Entity>.php` (read side)
 
 Extend `PSX\Sql\ViewAbstract`, with `getCollection(int $startIndex, int $count, ?string $search = null)` and
-`getEntity(int $id)`. Use `PSX\Nested\Builder` and the `COLUMN_*` constants. The output keys must match the
+`getEntity(int $id)`. Use `PSX\Nested\Builder` and the `COLUMN_*` constants. Each method has its own inline
+definition: the collection returns only the key properties for a list, and the entity returns the full detail
+representation. Don't share one definition between them. The output keys must match the
 TypeSchema property names (camelCase), and the collection shape must match `Collection`
 (`totalResults`, `startIndex`, `itemsPerPage`, `items`). See [view-builder.md](view-builder.md).
 

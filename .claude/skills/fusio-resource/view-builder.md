@@ -39,6 +39,18 @@ A plain string value copies the column as is. Wrap it to cast:
 | `fieldValue($value)` | a constant value |
 | `fieldCallback($col, fn($value) => ...)` | custom transformation |
 
+## Collection vs. entity response
+
+`getCollection` (`GET /product`) and `getEntity` (`GET /product/:id`) deliberately use **separate, inline
+definitions**. Don't extract a shared `getDefinition()` helper.
+
+- **Collection (list)**: only the most important properties needed to show the item in a list (ID, name or title,
+  status, date). Leave out large text fields and expensive nested lookups, because they run for every row.
+- **Entity (detail)**: the full representation, with all fields, nested relations, and related collections.
+
+Both responses can use the same TypeSchema `<Entity>` struct, because all generated properties are optional. The
+list simply fills fewer of them. Only define a separate summary struct if the shapes really differ.
+
 ## Template
 
 ```php
@@ -63,7 +75,13 @@ public function getCollection(int $startIndex, int $count, ?string $search = nul
         'totalResults' => $this->getTable(Table\Product::class)->getCount($condition),
         'startIndex' => $startIndex,
         'itemsPerPage' => $count,
-        'items' => $builder->doCollection([$this->getTable(Table\Product::class), 'findAll'], [$condition, $startIndex, $count], $this->getDefinition($builder)),
+        // list response: only the properties needed to render a list
+        'items' => $builder->doCollection([$this->getTable(Table\Product::class), 'findAll'], [$condition, $startIndex, $count], [
+            'id' => $builder->fieldInteger(Table\Generated\ProductTable::COLUMN_ID),
+            'name' => Table\Generated\ProductTable::COLUMN_NAME,
+            'price' => $builder->fieldNumber(Table\Generated\ProductTable::COLUMN_PRICE),
+            'insertDate' => $builder->fieldDateTime(Table\Generated\ProductTable::COLUMN_INSERT_DATE),
+        ]),
     ];
 
     return $builder->build($definition);
@@ -73,9 +91,26 @@ public function getEntity(int $id): mixed
 {
     $builder = new Builder($this->connection);
 
-    $definition = $builder->doEntity([$this->getTable(Table\Product::class), 'find'], [$id], $this->getDefinition($builder));
+    // detail response: all properties, including large fields and nested relations
+    $definition = $builder->doEntity([$this->getTable(Table\Product::class), 'find'], [$id], [
+        'id' => $builder->fieldInteger(Table\Generated\ProductTable::COLUMN_ID),
+        'user' => $builder->doEntity([$this->getTable(UserTable::class), 'find'], [new Reference(Table\Generated\ProductTable::COLUMN_USER_ID)], [
+            'id' => $builder->fieldInteger(UserTable::COLUMN_ID),
+            'name' => UserTable::COLUMN_NAME,
+        ]),
+        'name' => Table\Generated\ProductTable::COLUMN_NAME,
+        'description' => Table\Generated\ProductTable::COLUMN_DESCRIPTION,
+        'price' => $builder->fieldNumber(Table\Generated\ProductTable::COLUMN_PRICE),
+        'active' => $builder->fieldBoolean(Table\Generated\ProductTable::COLUMN_ACTIVE),
+        'insertDate' => $builder->fieldDateTime(Table\Generated\ProductTable::COLUMN_INSERT_DATE),
+    ]);
 
-    return $builder->build($definition);
+    $entity = $builder->build($definition);
+    if (empty($entity)) {
+        throw new StatusCode\NotFoundException('Provided product does not exist');
+    }
+
+    return $entity;
 }
 ```
 
@@ -83,7 +118,7 @@ public function getEntity(int $id): mixed
 `between`, `in`, `notIn`, `nil`, `notNil`, and `raw`. Use `Condition::withAnd()` or `Condition::withOr()`.
 
 Notes:
-- If `getEntity` returns `null`, throw `PSX\Http\Exception\NotFoundException` in the view or action so the client
+- Always throw `PSX\Http\Exception\NotFoundException` when the entity doesn't exist (see the template), so the client
   gets a 404 instead of an empty body.
 - To return data owned by the current user, add `$condition->equals(COLUMN_USER_ID, $userId)` and pass the user ID in
   from the action (`$context->getUser()->getId()`).

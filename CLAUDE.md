@@ -61,6 +61,8 @@ php bin/fusio route                               # list routes
   that app users need.
 - **Read vs. write actions:** GET actions delegate to a **View** (`getCollection` / `getEntity`). Create, update, and
   delete actions delegate to a **Service** and return `App\Model\Message`. Actions stay thin, with no business logic.
+- **Collection vs. entity views:** `getCollection` returns only the key properties for a list. `getEntity` returns the
+  full detail response. Each method keeps its own inline Builder definition, with no shared `getDefinition()` helper.
 - **Incoming payloads** reach the action already deserialized and validated as the DTO set with `setIncoming(...)`:
   `$request->getPayload()` returns e.g. `Model\Todo`. Path and query params come from `$request->get('id')`.
 - **Errors:** throw `PSX\Http\Exception\*` (`BadRequestException`, `NotFoundException`, `ForbiddenException`, ...).
