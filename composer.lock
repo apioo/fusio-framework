@@ -1832,16 +1832,16 @@
         },
         {
             "name": "fusio/cli",
-            "version": "v4.5.0",
+            "version": "v4.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/apioo/fusio-cli.git",
-                "reference": "ce8ca1270babbc1dffcc967564c4707390dd7f11"
+                "reference": "7ca4db573390e01f7ff337b3d5782bb9e98915ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/apioo/fusio-cli/zipball/ce8ca1270babbc1dffcc967564c4707390dd7f11",
-                "reference": "ce8ca1270babbc1dffcc967564c4707390dd7f11",
+                "url": "https://api.github.com/repos/apioo/fusio-cli/zipball/7ca4db573390e01f7ff337b3d5782bb9e98915ec",
+                "reference": "7ca4db573390e01f7ff337b3d5782bb9e98915ec",
                 "shasum": ""
             },
             "require": {
@@ -1880,7 +1880,7 @@
             "homepage": "https://www.fusio-project.org",
             "support": {
                 "issues": "https://github.com/apioo/fusio-cli/issues",
-                "source": "https://github.com/apioo/fusio-cli/tree/v4.5.0"
+                "source": "https://github.com/apioo/fusio-cli/tree/v4.5.1"
             },
             "funding": [
                 {
@@ -1896,7 +1896,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2026-08-29T17:42:22+00:00"
+            "time": "2026-10-04T20:46:46+00:00"
         },
         {
             "name": "fusio/engine",
@@ -12028,11 +12028,11 @@
     "packages-dev": [
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.16",
+            "version": "2.2.17",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92",
-                "reference": "46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e676a49fa70cee9f5bf6ff4796186b928a08673f",
+                "reference": "e676a49fa70cee9f5bf6ff4796186b928a08673f",
                 "shasum": ""
             },
             "require": {
@@ -12088,7 +12088,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-25T09:31:51+00:00"
+            "time": "2026-10-04T19:40:09+00:00"
         },
         {
             "name": "rector/rector",
