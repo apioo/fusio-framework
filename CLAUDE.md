@@ -37,12 +37,14 @@ php bin/fusio generate:model                      # resources/typeschema.json ->
 php bin/fusio migrations:generate --no-interaction  # new empty migration in src/Migrations
 php bin/fusio migrations:migrate --no-interaction   # run migrations; ASK THE USER FIRST
 php bin/fusio generate:table                      # DB tables with prefix app_ -> src/Table/Generated
-php bin/fusio adduser                             # create an account (interactive; user runs it via `!`)
-php bin/fusio login                               # authenticate the CLI (interactive; user runs it via `!`)
-php bin/fusio whoami                              # current CLI user, `null` = not logged in
+php bin/fusio adduser -n --role=1 --username=<u> --email=<e> --password=<p>  # create an admin account
+php bin/fusio login -n --username=<u> --password=<p>                         # authenticate the CLI
+php bin/fusio whoami                              # current CLI user, error = not logged in / token stale
+php bin/fusio logout                              # remove fusio_token.json (e.g. after a DB reset)
 php bin/fusio deploy                              # push resources/* to the Fusio instance (needs login)
 php bin/fusio generate:sdk client-typescript      # SDK zip in output/
 php bin/fusio route                               # list routes
+rm cache/container.php*                           # force a DI container rebuild (see below)
 ```
 
 ## Conventions
@@ -58,7 +60,9 @@ php bin/fusio route                               # list routes
 - **Every operation needs a scope** (`setScopes([...])`). The scope must exist in `scope.yaml` and be assigned in
   `role.yaml`. `setPublic(true)` means no auth is required (typical for GET). Writes are `setPublic(false)`.
 - **Roles:** `Administrator` gets every scope. `Consumer` (the default role for new registrations) gets the scopes
-  that app users need.
+  that app users need. Deploy **replaces** a role's scopes with the list in `role.yaml`, so never remove the Fusio
+  default scopes there: Administrator needs `authorization, backend, consumer, default`, and Consumer needs
+  `authorization, consumer, default`. Without `backend`, new admins lose backend access.
 - **Read vs. write actions:** GET actions delegate to a **View** (`getCollection` / `getEntity`). Create, update, and
   delete actions delegate to a **Service** and return `App\Model\Message`. Actions stay thin, with no business logic.
 - **Collection vs. entity views:** `getCollection` returns only the key properties for a list. `getEntity` returns the
@@ -71,6 +75,11 @@ php bin/fusio route                               # list routes
 - **Events:** services dispatch an event for every important state change through `Fusio\Engine\DispatcherInterface`
   (see `src/Service/Todo.php::dispatchEvent`). The dispatched name must match a key in `resources/event.yaml`
   **exactly**. Naming: `<entity>_<past-tense-verb>`, e.g. `todo_created`.
+- **Compiled DI container:** the container is compiled to `cache/container.php` and is **not** rebuilt
+  automatically (the rebuild check uses `APP_DEBUG`, which this project doesn't set). After you add a class or change a
+  constructor in `src/Action`, `src/Service`, `src/Table`, or `src/View`, delete `cache/container.php*`. Otherwise
+  requests fail with a `TypeError` like `__construct(): Argument #2 ... must be of type X, Y given`.
+  `php bin/fusio system:clear_cache` does **not** remove the container.
 - **DI:** constructor injection only. Classes are `readonly` with promoted `private` properties. Anything under
   `src/Action`, `src/Service`, `src/Table`, `src/View` is autowired, so new folders need an entry in
   `resources/container.php`.
@@ -78,8 +87,46 @@ php bin/fusio route                               # list routes
   syntax. Use `phpstan` (`vendor/bin/phpstan`) and `rector` for checks.
 - After changing anything in `resources/`, remind the user to run (or offer to run) `php bin/fusio deploy`.
 - **Deploy requires a logged-in CLI**, so the order is `adduser`, then `login`, then `deploy`. After a fresh install
-  no user exists, so `adduser` (role 1 = Administrator) must come first. Check with `php bin/fusio whoami`. Never run
-  `adduser` or `login` yourself or handle passwords. Ask the user to run them with the `!` prefix.
+  there is no usable account (only an internal `Administrator` with an unknown password), so `adduser` (role 1 =
+  Administrator) must come first. Check with `php bin/fusio whoami`. After a DB reset, run `logout` first.
+  Token scopes are fixed when the token is issued, so after a deploy that creates new scopes, run `login` again. Run
+  `adduser` and `login` yourself with flags (see the commands above). Always pass `-n`, and pass `--email` to
+  `adduser`, because a missing option otherwise opens an interactive prompt that hangs. Ask the user for the
+  username, email, and password, or offer to generate a password (see "Credentials" in `/fusio-setup`). On a shared
+  or production instance, let the user run the commands without flags in their own terminal instead.
+
+## Testing endpoints with `serve` (no web server needed)
+
+`php bin/fusio serve <METHOD> <URI> [<headers>]` dispatches one HTTP request internally. It writes the status line
+(e.g. `HTTP/1.1 404 Not Found`) to **stderr** and the response body to **stdout**. It exits with `0` for status codes
+below 400 and `1` otherwise. Use it to test endpoints after a deploy.
+
+```bash
+export MSYS_NO_PATHCONV=1   # Git Bash on Windows only: otherwise "/todo" is rewritten to "C:/Program Files/Git/todo"
+TOKEN=$(php -r 'echo json_decode(file_get_contents("fusio_token.json"), true)["access_token"];')
+H="Authorization=Bearer $TOKEN&Content-Type=application/json"
+
+php bin/fusio serve GET '/todo?search=foo' "$H" < /dev/null
+printf '%s' '{"title":"Test","completed":false}' | php bin/fusio serve POST /todo "$H"
+printf '%s' '{"title":"Test","completed":true}'  | php bin/fusio serve PUT /todo/1 "$H"
+php bin/fusio serve DELETE /todo/1 "$H" < /dev/null
+
+# body only (e.g. to extract the ID of a created record)
+php bin/fusio serve GET '/todo?search=foo' "$H" < /dev/null 2>/dev/null | php -r 'echo json_decode(stream_get_contents(STDIN))->items[0]->id;'
+```
+
+- Headers are **form encoded** (`Name=value&Name2=value2`), not `Name: value` lines. A default `User-Agent: PSX CLI`
+  is added if you don't send one.
+- POST, PUT, PATCH, and DELETE read the body from **stdin**. Always pipe a body in or redirect `< /dev/null`, because
+  otherwise the command waits for input.
+- Check the status line (or `$?`) for the result. Errors also come back as JSON with `"success": false` and an
+  exception `title` such as `NotFoundException`. Because error responses exit with `1`, don't run expected-failure
+  tests (400, 404, 401) under `set -e`.
+- When you pipe stdout into another command, add `2>/dev/null` so the status line isn't mixed in. Use `2>&1` to see
+  both.
+- The CLI token from `login` belongs to the logged-in admin and only has the scopes that existed when it was issued
+  (log in again after a deploy that adds scopes). Test anonymous access by leaving out `Authorization`.
+- Delete the test records you create.
 
 ## Workflows (skills)
 

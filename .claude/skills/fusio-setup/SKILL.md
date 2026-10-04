@@ -51,15 +51,41 @@ These steps must run in this order, because each one depends on the previous one
    php bin/fusio migrations:migrate --no-interaction
    ```
 
-2. **Create an administrator account.** A fresh installation has no users, and `login` only works with an existing
-   account. The user runs `! php bin/fusio adduser` and picks role `1` (Administrator).
-3. **Log in the CLI** with those credentials. The user runs `! php bin/fusio login`. This stores an access token in
-   `fusio_token.json`, which expires after 2 days by default.
-4. **Deploy:** `php bin/fusio deploy` (see `/fusio-deploy`).
+2. **Create an administrator account.** `login` only works with an account whose password the user knows. The
+   installation only seeds an internal `Administrator` user (`admin@localhost.com`) with an unknown password. If the
+   database was reset, a stale `fusio_token.json` from the old installation remains, so run `php bin/fusio logout`
+   first. Then create the account non-interactively (see "Credentials" below):
 
-`adduser` and `login` prompt for credentials. Never run them yourself and never ask for the password in chat. Tell the
-user to run them with the `!` prefix as shown, then confirm the login with `php bin/fusio whoami` (it prints `null`
-if nobody is logged in) before you deploy.
+   ```
+   php bin/fusio adduser -n --role=1 --username="<user>" --email="<email>" --password="<password>"
+   ```
+
+3. **Log in the CLI** with the same credentials. This stores an access token in `fusio_token.json`, which expires
+   after 2 days by default:
+
+   ```
+   php bin/fusio login -n --username="<user>" --password="<password>"
+   ```
+
+4. **Deploy:** `php bin/fusio deploy` (see `/fusio-deploy`).
+5. **Log in again** with the same `login` command. The first deploy creates the app scopes (e.g. `todo`). The token
+   from step 3 was issued before they existed, so calls to private operations would fail with "not in the scope of
+   the provided token".
+
+Confirm each login with `php bin/fusio whoami`. It prints the user (YAML) when logged in, and an error otherwise (see
+`/fusio-deploy` for what each error means).
+
+### Credentials
+
+- Ask the user for a username and email. If they don't care, suggest `admin` / `admin@localhost.com`.
+- For the password, ask whether to use their own or let you generate one with
+  `php -r 'echo bin2hex(random_bytes(12));'` (24 characters). Fusio requires at least 8 characters. Show a generated
+  password to the user once, so they can log in to the backend later, and don't write it into any file.
+- `--email` is required. Without it, `adduser` stops at an interactive prompt, or fails with "User email must not be
+  empty" when run with `-n`. Always pass `-n` so a missing option fails immediately instead of hanging.
+- Passwords passed as flags end up in the conversation and in shell history. That is fine for a local dev instance.
+  For a shared or production instance, ask the user to run `php bin/fusio adduser` and `php bin/fusio login` without
+  flags in their own terminal instead. The interactive prompts don't work through Claude Code's `!` prefix.
 
 ## 6. Next steps
 

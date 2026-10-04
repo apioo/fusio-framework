@@ -19,34 +19,39 @@ would. So the whole Fusio configuration lives in Git and can be reproduced anywh
 
 `deploy` talks to the Fusio API, so the CLI must be logged in. The chain is **adduser, then login, then deploy**:
 
-1. **Check the login state:** `php bin/fusio whoami`. It prints the current user, or `null` if nobody is logged in.
-   The login token is stored in `fusio_token.json` and expires (after 2 days by default, see
-   `fusio_expire_token` in `configuration.php`). An expired token also requires a new login.
-2. **If not logged in, make sure a user exists.** Login only works with an existing account. On a fresh installation
-   (right after `migrations:migrate`) there is no user yet, so the user must create an administrator first:
+1. **Check the login state:** `php bin/fusio whoami`. The login token is stored in `fusio_token.json` in the project
+   root. Read the result like this:
+   - prints the user (YAML with `id`, `name`, `scopes`): logged in, continue with the deploy
+   - `Found no existing token, please request a token through the login command`: never logged in, so log in
+   - `Existing token is expired, ...`: the token expired (after 2 days by default, see `fusio_expire_token` in
+     `configuration.php`), so log in again
+   - `Invalid access token` (with a stack trace): the token file is stale, typically because the database was
+     reset or reinstalled. Run `php bin/fusio logout` to remove it, then log in again
+2. **If not logged in, make sure a user account exists.** Login only works with an existing account. The installation
+   (`migrations:migrate`) seeds an internal `Administrator` user (`admin@localhost.com`) whose password isn't known, so
+   it can't be used to log in. On a fresh installation, create an administrator first (role `1`, since deploy needs
+   admin rights):
 
    ```
-   php bin/fusio adduser
+   php bin/fusio adduser -n --role=1 --username="<user>" --email="<email>" --password="<password>"
    ```
 
-   Choose role `1` (Administrator). Deploy needs admin rights.
 3. **Log in** with those credentials:
 
    ```
-   php bin/fusio login
+   php bin/fusio login -n --username="<user>" --password="<password>"
    ```
 
 4. **Deploy:** `php bin/fusio deploy`.
 
-`adduser` and `login` prompt for a username, email, and password. **Don't run them yourself and never ask for or
-handle the password.** Ask the user to run them in the session with the `!` prefix:
+Run `adduser` and `login` yourself with flags, as shown. Always pass `-n`: without it, a missing option (e.g.
+`--email`) opens an interactive prompt that hangs. See "Credentials" in `/fusio-setup` for how to choose the
+username, email, and password. A failed login (wrong password, HTTP 401 `invalid_client`) keeps the previous token.
 
-- `! php bin/fusio adduser`
-- `! php bin/fusio login`
-
-If you aren't sure whether an account exists, ask the user. They can try `login` first and fall back to `adduser` if
-it fails. If `deploy` fails with an auth or token error (e.g. "Existing token is expired"), stop and ask the user to
-run `! php bin/fusio login` again, then retry the deploy.
+If you don't know the credentials of an existing account, ask the user for them, or create a new admin with
+`adduser`. If `deploy` fails with an auth or token error (e.g. "Existing token is expired"), run the `login` command
+again and retry the deploy. On a shared or production instance, ask the user to run `php bin/fusio login` without
+flags in their own terminal instead, so the password doesn't end up in the conversation.
 
 ## Before deploying
 
@@ -54,6 +59,9 @@ run `! php bin/fusio login` again, then retry the deploy.
 2. Check cross-references:
    - every operation's scope exists in `scope.yaml`
    - every scope used by an app user is in the `Consumer` role in `role.yaml`
+   - `role.yaml` still contains the Fusio default scopes (Administrator: `authorization, backend, consumer,
+     default`; Consumer: `authorization, consumer, default`). Deploy replaces role scopes, so a missing `backend`
+     scope locks new admins out of the backend
    - every event name dispatched in `src/Service/*` is a key in `event.yaml`
    - every `setIncoming` / `setOutgoing` / `addThrow` class exists in `src/Model` (rerun `generate:model` if not)
    - every action class referenced in operations and cronjobs exists
@@ -62,6 +70,15 @@ run `! php bin/fusio login` again, then retry the deploy.
 ## After deploying
 
 - `php bin/fusio route` lists the routes that are now active.
+- Smoke test the changed endpoints with `php bin/fusio serve` (see "Testing endpoints with `serve`" in `CLAUDE.md`).
+  It needs no web server.
+- If calls fail with a `TypeError` in a constructor (`Argument #N ... must be of type X, Y given`), the compiled DI
+  container is stale. Delete `cache/container.php*`. `system:clear_cache` doesn't remove it.
+- **New scopes need a new token.** Token scopes are fixed when the token is issued. If the deploy created new scopes
+  (e.g. `[CREATED] scope todo`), existing tokens, including the CLI token from `login`, don't include them and
+  calls fail with "Access to this operation is not in the scope of the provided token". The users already have the
+  scope through their role, so just run the `login` command again. This always
+  happens on a fresh setup, because login (step 3) happens before the first deploy creates the app scopes.
 - If the deploy reports an error, fix the referenced resource file and deploy again. Deploy is idempotent.
 - To enable an optional section (`connection`, `plan`, `agent`), create `resources/<name>.yaml` and uncomment the
   matching line in `.fusio.yml`.

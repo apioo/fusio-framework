@@ -104,14 +104,22 @@ See [operation.md](operation.md) for the builder API and the correct incoming an
 
 - `resources/scope.yaml`: add `<entity>:` with a `description`.
 - `resources/role.yaml`: add the scope to `Administrator`, and also to `Consumer` if regular users should use it.
+  Only append scopes, and never remove the existing default scopes (`authorization`, `backend`, `consumer`,
+  `default`). Deploy replaces a role's whole scope list.
 - `resources/event.yaml`: add `<entity>_created`, `<entity>_updated`, and `<entity>_deleted` with descriptions. The
   names must match what the service dispatches, character for character.
 
 ## 8. Verify and deploy
 
 1. `php -l` every new PHP file, and run `vendor/bin/phpstan` if available.
-2. Run `php bin/fusio deploy` (see `/fusio-deploy`), then `php bin/fusio route` to confirm the routes exist.
-3. Summarize for the user the new endpoints (method, path, public or private, scope) and any commands they still need
+2. Delete the compiled DI container (`rm cache/container.php*`). It isn't rebuilt automatically, so new or changed
+   actions, services, and views would otherwise fail with a constructor `TypeError` or "service not found".
+3. Run `php bin/fusio deploy` (see `/fusio-deploy`), then `php bin/fusio route` to confirm the routes exist.
+4. Test every endpoint with `php bin/fusio serve` (see "Testing endpoints with `serve`" in `CLAUDE.md`): create,
+   list, get, update, and delete, plus a 400 (invalid payload), a 404 (unknown ID), and an anonymous write (must be
+   rejected with a 401). Check the status line on stderr: create returns 201, and the other successful calls 200. If the deploy created the new scope, ask the user to run `php bin/fusio login` again first. Remove the
+   test records afterwards.
+5. Summarize for the user the new endpoints (method, path, public or private, scope) and any commands they still need
    to run.
 
 ## Checklist
@@ -123,4 +131,5 @@ See [operation.md](operation.md) for the builder API and the correct incoming an
 - [ ] Actions GetAll, Get, Create, Update, Delete
 - [ ] Operation files + operation.yaml entries
 - [ ] scope.yaml, role.yaml, event.yaml
-- [ ] deploy
+- [ ] clear `cache/container.php*`, deploy
+- [ ] test all endpoints with `php bin/fusio serve`
