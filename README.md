@@ -22,7 +22,7 @@ files and a demo todo endpoint which shows how you can build a simple endpoint.
 
 * Run `composer install` to install all required dependencies
 * Enter the correct database credentials at the `.env` file
-* Run the command `php bin/fusio migrate`
+* Run the command `php bin/fusio migrations:migrate`
   * This command installs the Fusio and app tables at the provided database
 * Run the command `php bin/fusio adduser`
   * This command adds a new administrator account
@@ -47,10 +47,10 @@ want to use the backend app you need to install it from the marketplace via: `ph
 * __container.php__
   > Contains the [Symfony DI](https://symfony.com/doc/current/components/dependency_injection.html) container configuration
 
-* __events.yaml__
+* __event.yaml__
   > Contains a list of events which are triggered by the app. Users can then register HTTP callbacks to receives those events
 
-* __operations.yaml__
+* __operation.yaml__
   > Contains all available operations with a reference to an operation file inside the `operations/` folder
 
 * __typeschema.json__
@@ -62,7 +62,7 @@ want to use the backend app you need to install it from the marketplace via: `ph
   > Contains all action classes which are used at the defined operations
 
 * __Migrations__
-  > Contains all migration files to setup the database structure (`php bin/fusio migration:generate`)
+  > Contains all migration files to setup the database structure (`php bin/fusio migrations:generate`)
 
 * __Model__
   > Contains the generated model classes (`php bin/fusio generate:model`)
