@@ -19,6 +19,6 @@ return function (Operation $operation) {
     $operation->addParameter('count', PropertyTypeFactory::getInteger());
     $operation->addParameter('search', PropertyTypeFactory::getString());
     $operation->setOutgoing(Model\TodoCollection::class);
-    $operation->addThrow(500, Model\TodoCollection::class);
+    $operation->addThrow(500, Model\Message::class);
     $operation->setAction(Action\Todo\GetAll::class);
 };

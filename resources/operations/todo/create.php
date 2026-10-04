@@ -15,7 +15,8 @@ return function (Operation $operation) {
     $operation->setHttpPath('/todo');
     $operation->setHttpCode(201);
     $operation->setIncoming(Model\Todo::class);
-    $operation->setOutgoing(Model\TodoCollection::class);
-    $operation->addThrow(500, Model\TodoCollection::class);
+    $operation->setOutgoing(Model\Message::class);
+    $operation->addThrow(400, Model\Message::class);
+    $operation->addThrow(500, Model\Message::class);
     $operation->setAction(Action\Todo\Create::class);
 };

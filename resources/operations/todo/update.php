@@ -16,6 +16,8 @@ return function (Operation $operation) {
     $operation->setHttpCode(200);
     $operation->setIncoming(Model\Todo::class);
     $operation->setOutgoing(Model\Message::class);
+    $operation->addThrow(400, Model\Message::class);
+    $operation->addThrow(404, Model\Message::class);
     $operation->addThrow(500, Model\Message::class);
     $operation->setAction(Action\Todo\Update::class);
 };

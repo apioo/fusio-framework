@@ -15,6 +15,7 @@ return function (Operation $operation) {
     $operation->setHttpPath('/todo/:id');
     $operation->setHttpCode(200);
     $operation->setOutgoing(Model\Message::class);
+    $operation->addThrow(404, Model\Message::class);
     $operation->addThrow(500, Model\Message::class);
     $operation->setAction(Action\Todo\Delete::class);
 };
