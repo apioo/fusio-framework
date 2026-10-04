@@ -68,7 +68,7 @@ readonly class Todo
     {
         $row = $this->table->find($id);
         if (!$row instanceof Table\Generated\TodoRow) {
-            throw new StatusCode\NotFoundException('Provided post does not exist');
+            throw new StatusCode\NotFoundException('Provided todo entry does not exist');
         }
 
         $this->table->delete($row);
