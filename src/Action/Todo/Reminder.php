@@ -10,7 +10,7 @@ use Fusio\Engine\ParametersInterface;
 use Fusio\Engine\RequestInterface;
 
 /**
- * Action which updates a todo entry
+ * Action which sends a reminder for all open todo entries
  */
 readonly class Reminder implements ActionInterface
 {
